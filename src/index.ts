@@ -1,6 +1,6 @@
-import "reflect-metadata";
-import {createConnection} from "typeorm";
-import {User} from "./entity/User";
+import 'reflect-metadata';
+import { createConnection } from 'typeorm';
+import { User } from './entity/User';
 
 // createConnection().then(async connection => {
 
@@ -20,21 +20,21 @@ import {User} from "./entity/User";
 
 // }).catch(error => console.log(error));
 
-import "reflect-metadata";
-import { ApolloGateway } from "@apollo/gateway";
-import { ApolloServer } from "apollo-server";
+import 'reflect-metadata';
+import { ApolloGateway } from '@apollo/gateway';
+import { ApolloServer } from 'apollo-server';
 
-import * as accounts from "./accounts";
-import * as reviews from "./reviews";
-import * as products from "./products";
-import * as inventory from "./inventory";
+import * as accounts from './subgraphs/accounts';
+import * as users from './subgraphs/users';
+import * as alerts from './subgraphs/alerts';
 
 async function bootstrap() {
+  await createConnection();
+
   const serviceList = [
-    { name: "accounts", url: await accounts.listen(3001) },
-    { name: "reviews", url: await reviews.listen(3002) },
-    { name: "products", url: await products.listen(3003) },
-    { name: "inventory", url: await inventory.listen(3004) },
+    { name: 'accounts', url: await accounts.listen(3001) },
+    { name: 'users', url: await users.listen(3002) },
+    { name: 'alerts', url: await alerts.listen(3003) },
   ];
 
   const gateway = new ApolloGateway({
@@ -46,8 +46,6 @@ async function bootstrap() {
   const server = new ApolloServer({
     schema,
     executor,
-    tracing: false,
-    playground: true,
   });
 
   server.listen({ port: 3000 }).then(({ url }) => {
@@ -56,4 +54,3 @@ async function bootstrap() {
 }
 
 bootstrap().catch(console.error);
-
